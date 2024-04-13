@@ -6,6 +6,7 @@ import "github.com/p0poff/mock/app/storage"
 
 var opts struct {
 	Verbose []bool `short:"v" long:"verbose" description:"Show verbose debug information"`
+	FileDb  string `short:"f" long:"filedb" description:"file db path" required:"true"`
 }
 
 func main() {
@@ -18,13 +19,30 @@ func main() {
 		return
 	}
 
-	db := storage.TestSqlConnect()
-	err = db.Ping()
+	sqlite, err := storage.NewSqliteDB(opts.FileDb)
 	if err != nil {
-		fmt.Println("Error connecting to database:", err)
-		if err.Error() == "sql: database is closed" {
-			fmt.Println("must be restore db connection")
-		}
+		fmt.Println("Error opening database:", err)
+		return
+	}
+
+	db, err := storage.NewSQLiteDB(sqlite)
+	if err != nil {
+		fmt.Println("Error creating SQLiteDB:", err)
+		return
+	}
+
+	defer db.Close()
+
+	err = db.CreateTables()
+	if err != nil {
+		fmt.Println("Error creating tables:", err)
+		return
+	}
+
+	err = db.AddProduct("Apple", 0.5)
+	if err != nil {
+		fmt.Println("Error adding product:", err)
+		return
 	}
 
 	fmt.Printf("Verbosity: %v\n", opts.Verbose)
