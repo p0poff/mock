@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark" />
+    <link rel="stylesheet" href="pico.amber.min.css">
+    <title>Hello world!</title>
+  </head>
+  <body>
+    <main class="container">
+      <h1>Mock server admin panel</h1>
+      
+      <h3>Settings</h3>
+      <table>
+        <thead data-theme="light">
+          <tr>
+            <th scope="col">Setting</th>
+            <th scope="col">Value</th>
+            <th scope="col">Options</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Default headers</th>
+            <td>
+                <div class="container">
+                    <div>Content-Type: application/json</div>
+                    <div>Server: Mock server</div>
+                </div>
+            </td>
+            <td><button class="secondary">Edit</button></td>
+          </tr>
+      </table>
+      
+      <h3>Routing</h3>
+      <table>
+        <thead data-theme="dark">
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Route</th>
+            <th scope="col">Method</th>
+            <th scope="col">Options</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <th scope="row">api/v1/comm_calendar/events</th>
+            <td>GET</td>
+            <td><button class="contrast">Edit</button></td>
+          </tr>
+      </table>
+
+    </main>
+  </body>
+</html>
