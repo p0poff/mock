@@ -43,7 +43,7 @@ func (s *Server) defaultHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) Start() error {
 	addr := ":" + s.port
-	log.Printf("[INFO] Server start? port: %s", addr)
+	log.Printf("[INFO] Server start! port: %s", addr)
 
 	http.HandleFunc("/hello", s.helloHandler)
 	http.HandleFunc("/", s.defaultHandler)
