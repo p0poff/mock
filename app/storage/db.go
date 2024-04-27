@@ -3,6 +3,7 @@ package storage
 import (
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
+	"log"
 )
 
 type SQLiteDB struct {
@@ -22,16 +23,20 @@ func (s *SQLiteDB) Close() error {
 func (s *SQLiteDB) CreateTables() error {
 	// SQL query to create tables
 	query := `
-		CREATE TABLE IF NOT EXISTS users (
+		CREATE TABLE IF NOT EXISTS setting (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL,
-			age INTEGER NOT NULL
+			option VARCHAR(50) NOT NULL,
+			value VARCHAR(500) NOT NULL
 		);
-		CREATE TABLE IF NOT EXISTS products (
+		CREATE TABLE IF NOT EXISTS route (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL,
-			price REAL NOT NULL
+			url VARCHAR(500) NOT NULL,
+			method VARCHAR(12) NOT NULL,
+			headers JSON NOT NULL DEFAULT "{}",
+			body TEXT
 		);
+		INSERT INTO setting (option, value)
+		VALUES ('default_headers', '{"Content-Type": "application/json"}')
 	`
 
 	// Execute the SQL query
@@ -41,6 +46,19 @@ func (s *SQLiteDB) CreateTables() error {
 	}
 
 	return nil
+}
+
+func (s *SQLiteDB) TableExists(tableName string) bool {
+	var name string
+	query := `SELECT name FROM sqlite_master WHERE type='table' AND name=?;`
+	err := s.db.QueryRow(query, tableName).Scan(&name)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			log.Printf("[CRITICAL] Query error: %s", err)
+		}
+		return false
+	}
+	return true
 }
 
 func (s *SQLiteDB) AddProduct(name string, price float64) error {

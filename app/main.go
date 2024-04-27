@@ -53,6 +53,15 @@ func main() {
 
 	defer db.Close()
 
+	if !db.TableExists("route") {
+		fmt.Println("Creating tables")
+		err = db.CreateTables()
+		if err != nil {
+			fmt.Println("Error creating tables:", err)
+			return
+		}
+	}
+
 	//server
 	s := server.NewServer(opts.Port, db)
 
