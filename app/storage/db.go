@@ -82,6 +82,37 @@ func (s *SQLiteDB) AddRoute(route Route) error {
 	return nil
 }
 
+func (s *SQLiteDB) GetRoutes() ([]Route, error) {
+	query := `
+		SELECT id, url, method, headers, body
+		FROM route
+	`
+	rows, err := s.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var routes []Route
+	for rows.Next() {
+		var route Route
+		var headersJSON string
+		err := rows.Scan(&route.Id, &route.Url, &route.Method, &headersJSON, &route.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		err = json.Unmarshal([]byte(headersJSON), &route.Headers)
+		if err != nil {
+			return nil, err
+		}
+
+		routes = append(routes, route)
+	}
+
+	return routes, nil
+}
+
 func (s *SQLiteDB) AddProduct(name string, price float64) error {
 	query := `
 		INSERT INTO products (name, price)

@@ -1,6 +1,7 @@
 package storage
 
 type Route struct {
+	Id      int
 	Url     string
 	Method  string
 	Headers []map[string]string

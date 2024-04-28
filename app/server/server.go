@@ -96,6 +96,23 @@ func (s *Server) adminAddRouteHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
+func (s *Server) getRoutersHandler(w http.ResponseWriter, r *http.Request) {
+	routers, err := s.db.GetRoutes()
+	if err != nil {
+		log.Println("[ERROR] Failed to get routers:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	jsonResponse, err := json.Marshal(routers)
+	if err != nil {
+		log.Println("[ERROR] Failed to marshal JSON response:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonResponse)
+}
+
 func (s *Server) Start() error {
 	addr := ":" + s.port
 	log.Printf("[INFO] Server start! port: %s", addr)
@@ -105,6 +122,7 @@ func (s *Server) Start() error {
 	http.HandleFunc("/", s.defaultHandler)
 	http.HandleFunc("/admin", s.adminindexHandler)
 	http.HandleFunc("/admin/add-route", s.adminAddRouteHandler)
+	http.HandleFunc("/admin/get-routers", s.getRoutersHandler)
 
 	//static
 	fs := http.FileServer(http.Dir("html"))
