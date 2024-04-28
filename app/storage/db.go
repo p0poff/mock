@@ -82,6 +82,38 @@ func (s *SQLiteDB) AddRoute(route Route) error {
 	return nil
 }
 
+func (s *SQLiteDB) EditRoute(route Route) error {
+	query := `
+		UPDATE route
+		SET url = ?, method = ?, headers = ?, body = ?
+		WHERE id = ?
+	`
+	headersJSON, err := json.Marshal(route.Headers)
+	if err != nil {
+		return err
+	}
+
+	_, err = s.db.Exec(query, route.Url, route.Method, headersJSON, route.Body, route.Id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *SQLiteDB) DeleteRoute(route Route) error {
+	query := `
+		DELETE FROM route
+		WHERE id = ?
+	`
+	_, err := s.db.Exec(query, route.Id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *SQLiteDB) GetRoutes() ([]Route, error) {
 	query := `
 		SELECT id, url, method, headers, body

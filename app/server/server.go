@@ -96,7 +96,55 @@ func (s *Server) adminAddRouteHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (s *Server) getRoutersHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) adminEditRouteHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var route storage.Route
+	err := json.NewDecoder(r.Body).Decode(&route)
+	if err != nil {
+		log.Println("[ERROR] Failed to decode JSON request:", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	err = s.db.EditRoute(route)
+	if err != nil {
+		log.Println("[ERROR] Failed to edit route:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (s *Server) adminDeleteRouteHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var route storage.Route
+	err := json.NewDecoder(r.Body).Decode(&route)
+	if err != nil {
+		log.Println("[ERROR] Failed to decode JSON request:", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	err = s.db.DeleteRoute(route)
+	if err != nil {
+		log.Println("[ERROR] Failed to delete route:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (s *Server) adminGetRoutersHandler(w http.ResponseWriter, r *http.Request) {
 	routers, err := s.db.GetRoutes()
 	if err != nil {
 		log.Println("[ERROR] Failed to get routers:", err)
@@ -122,7 +170,9 @@ func (s *Server) Start() error {
 	http.HandleFunc("/", s.defaultHandler)
 	http.HandleFunc("/admin", s.adminindexHandler)
 	http.HandleFunc("/admin/add-route", s.adminAddRouteHandler)
-	http.HandleFunc("/admin/get-routers", s.getRoutersHandler)
+	http.HandleFunc("/admin/get-routers", s.adminGetRoutersHandler)
+	http.HandleFunc("/admin/edit-route", s.adminEditRouteHandler)
+	http.HandleFunc("/admin/delete-route", s.adminDeleteRouteHandler)
 
 	//static
 	fs := http.FileServer(http.Dir("html"))
