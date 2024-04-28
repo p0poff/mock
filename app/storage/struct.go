@@ -13,11 +13,3 @@ type Setting struct {
 	Option string
 	Value  string
 }
-
-type Routers struct {
-	Routes []Route
-}
-
-type Settings struct {
-	Settings []Setting
-}
