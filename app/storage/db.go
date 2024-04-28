@@ -2,6 +2,7 @@ package storage
 
 import (
 	"database/sql"
+	"encoding/json"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 )
@@ -36,7 +37,9 @@ func (s *SQLiteDB) CreateTables() error {
 			body TEXT
 		);
 		INSERT INTO setting (option, value)
-		VALUES ('default_headers', '{"Content-Type": "application/json"}')
+		VALUES ('default_headers', '{"Content-Type": "application/json"}');
+	
+		CREATE UNIQUE INDEX IF NOT EXISTS idx_route_url_method ON route (url, method);
 	`
 
 	// Execute the SQL query
@@ -59,6 +62,24 @@ func (s *SQLiteDB) TableExists(tableName string) bool {
 		return false
 	}
 	return true
+}
+
+func (s *SQLiteDB) AddRoute(route Route) error {
+	query := `
+		INSERT INTO route (url, method, headers, body)
+		VALUES (?, ?, ?, ?)
+	`
+	headersJSON, err := json.Marshal(route.Headers)
+	if err != nil {
+		return err
+	}
+
+	_, err = s.db.Exec(query, route.Url, route.Method, headersJSON, route.Body)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *SQLiteDB) AddProduct(name string, price float64) error {

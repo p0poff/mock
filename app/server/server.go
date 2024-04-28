@@ -72,6 +72,30 @@ func (s *Server) adminindexHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeContent(w, r, "index.html", fileInfo.ModTime(), file)
 }
 
+func (s *Server) adminAddRouteHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var route storage.Route
+	err := json.NewDecoder(r.Body).Decode(&route)
+	if err != nil {
+		log.Println("[ERROR] Failed to decode JSON request:", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	err = s.db.AddRoute(route)
+	if err != nil {
+		log.Println("[ERROR] Failed to add route:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+}
+
 func (s *Server) Start() error {
 	addr := ":" + s.port
 	log.Printf("[INFO] Server start! port: %s", addr)
@@ -80,6 +104,7 @@ func (s *Server) Start() error {
 	http.HandleFunc("/hello", s.helloHandler)
 	http.HandleFunc("/", s.defaultHandler)
 	http.HandleFunc("/admin", s.adminindexHandler)
+	http.HandleFunc("/admin/add-route", s.adminAddRouteHandler)
 
 	//static
 	fs := http.FileServer(http.Dir("html"))
