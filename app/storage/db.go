@@ -11,10 +11,32 @@ type SQLiteDB struct {
 	db *sql.DB
 }
 
+type scanner interface {
+	Scan(dest ...interface{}) error
+}
+
 func NewSQLiteDB(db *sql.DB) (*SQLiteDB, error) {
 	return &SQLiteDB{
 		db: db,
 	}, nil
+}
+
+func getRouteFromDb(row scanner) (Route, error) {
+	var route Route
+	var headersJSON string
+	err := row.Scan(&route.Id, &route.Url, &route.Method, &headersJSON, &route.Body)
+	if err != nil {
+		log.Println("[ERROR] Failed to scan route (GetRoute):", err)
+		return route, err
+	}
+
+	err = json.Unmarshal([]byte(headersJSON), &route.Headers)
+	if err != nil {
+		log.Println("[ERROR] Failed to unmarshal headers (GetRoute):", err)
+		return route, err
+	}
+
+	return route, nil
 }
 
 func (s *SQLiteDB) Close() error {
@@ -127,17 +149,8 @@ func (s *SQLiteDB) GetRoutes() ([]Route, error) {
 
 	var routes []Route
 	for rows.Next() {
-		var route Route
-		var headersJSON string
-		err := rows.Scan(&route.Id, &route.Url, &route.Method, &headersJSON, &route.Body)
+		route, err := getRouteFromDb(rows)
 		if err != nil {
-			log.Println("[ERROR] Failed to scan route:", err)
-			return nil, err
-		}
-
-		err = json.Unmarshal([]byte(headersJSON), &route.Headers)
-		if err != nil {
-			log.Println("[ERROR] Failed to unmarshal headers:", err)
 			return nil, err
 		}
 
@@ -155,17 +168,8 @@ func (s *SQLiteDB) GetRoute(url string, method string) (Route, error) {
 	`
 	row := s.db.QueryRow(query, url, method)
 
-	var route Route
-	var headersJSON string
-	err := row.Scan(&route.Id, &route.Url, &route.Method, &headersJSON, &route.Body)
+	route, err := getRouteFromDb(row)
 	if err != nil {
-		log.Println("[ERROR] Failed to scan route (GetRoute):", err)
-		return route, err
-	}
-
-	err = json.Unmarshal([]byte(headersJSON), &route.Headers)
-	if err != nil {
-		log.Println("[ERROR] Failed to unmarshal headers (GetRoute):", err)
 		return route, err
 	}
 
