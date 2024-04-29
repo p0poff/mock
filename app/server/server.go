@@ -22,12 +22,6 @@ func NewServer(port string, db *storage.SQLiteDB) *Server {
 	return s
 }
 
-func (s *Server) helloHandler(w http.ResponseWriter, r *http.Request) {
-	// Add your hello logic here
-	_ = s.db.AddProduct("Apple", 11)
-	w.Write([]byte("Hello, World!"))
-}
-
 func (s *Server) defaultHandler(w http.ResponseWriter, r *http.Request) {
 	uri := r.URL.Path
 	method := r.Method
@@ -161,18 +155,43 @@ func (s *Server) adminGetRoutersHandler(w http.ResponseWriter, r *http.Request) 
 	w.Write(jsonResponse)
 }
 
+func (s *Server) mockHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("[INFO] request uri (method): %s (%s)", r.URL.Path, r.Method)
+	// Get the route from the database
+	route, err := s.db.GetRoute(r.URL.Path, r.Method)
+	if err != nil {
+		log.Println("[ERROR] Failed to get route:", err)
+
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	// Set the headers
+	for key, value := range route.Headers {
+		w.Header().Set(key, value)
+	}
+
+	// Set the status code
+	w.WriteHeader(200)
+
+	// Write the body
+	w.Write([]byte(route.Body))
+}
+
 func (s *Server) Start() error {
 	addr := ":" + s.port
 	log.Printf("[INFO] Server start! port: %s", addr)
 
 	//routing
-	http.HandleFunc("/hello", s.helloHandler)
-	http.HandleFunc("/", s.defaultHandler)
+	// http.HandleFunc("/", s.defaultHandler)
 	http.HandleFunc("/admin", s.adminindexHandler)
 	http.HandleFunc("/admin/add-route", s.adminAddRouteHandler)
 	http.HandleFunc("/admin/get-routers", s.adminGetRoutersHandler)
 	http.HandleFunc("/admin/edit-route", s.adminEditRouteHandler)
 	http.HandleFunc("/admin/delete-route", s.adminDeleteRouteHandler)
+	http.HandleFunc("/", s.mockHandler)
 
 	//static
 	fs := http.FileServer(http.Dir("html"))

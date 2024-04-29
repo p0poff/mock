@@ -147,16 +147,30 @@ func (s *SQLiteDB) GetRoutes() ([]Route, error) {
 	return routes, nil
 }
 
-func (s *SQLiteDB) AddProduct(name string, price float64) error {
+func (s *SQLiteDB) GetRoute(url string, method string) (Route, error) {
 	query := `
-		INSERT INTO products (name, price)
-		VALUES (?, ?)
+		SELECT id, url, method, headers, body
+		FROM route
+		WHERE url = ? AND method = ?
 	`
-	_, err := s.db.Exec(query, name, price)
+	row := s.db.QueryRow(query, url, method)
+
+	var route Route
+	var headersJSON string
+	err := row.Scan(&route.Id, &route.Url, &route.Method, &headersJSON, &route.Body)
 	if err != nil {
-		return err
+		log.Println("[ERROR] Failed to scan route (GetRoute):", err)
+		return route, err
 	}
-	return nil
+
+	err = json.Unmarshal([]byte(headersJSON), &route.Headers)
+	if err != nil {
+		log.Println("[ERROR] Failed to unmarshal headers (GetRoute):", err)
+		return route, err
+	}
+
+	return route, nil
+
 }
 
 // Add other methods for interacting with the SQLite database here
