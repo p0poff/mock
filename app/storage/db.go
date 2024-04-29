@@ -131,11 +131,13 @@ func (s *SQLiteDB) GetRoutes() ([]Route, error) {
 		var headersJSON string
 		err := rows.Scan(&route.Id, &route.Url, &route.Method, &headersJSON, &route.Body)
 		if err != nil {
+			log.Println("[ERROR] Failed to scan route:", err)
 			return nil, err
 		}
 
 		err = json.Unmarshal([]byte(headersJSON), &route.Headers)
 		if err != nil {
+			log.Println("[ERROR] Failed to unmarshal headers:", err)
 			return nil, err
 		}
 

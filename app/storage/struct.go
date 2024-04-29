@@ -4,7 +4,7 @@ type Route struct {
 	Id      int
 	Url     string
 	Method  string
-	Headers []map[string]string
+	Headers map[string]string
 	Body    string
 }
 
