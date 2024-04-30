@@ -174,7 +174,7 @@ func (s *Server) mockHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set the status code
-	w.WriteHeader(200)
+	w.WriteHeader(route.StatusCode)
 
 	// Write the body
 	w.Write([]byte(route.Body))

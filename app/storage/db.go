@@ -24,7 +24,7 @@ func NewSQLiteDB(db *sql.DB) (*SQLiteDB, error) {
 func getRouteFromDb(row scanner) (Route, error) {
 	var route Route
 	var headersJSON string
-	err := row.Scan(&route.Id, &route.Url, &route.Method, &headersJSON, &route.Body)
+	err := row.Scan(&route.Id, &route.Url, &route.Method, &headersJSON, &route.StatusCode, &route.Body)
 	if err != nil {
 		log.Println("[ERROR] Failed to scan route (GetRoute):", err)
 		return route, err
@@ -56,6 +56,7 @@ func (s *SQLiteDB) CreateTables() error {
 			url VARCHAR(500) NOT NULL,
 			method VARCHAR(12) NOT NULL,
 			headers JSON NOT NULL DEFAULT "{}",
+			status_code INTEGER NOT NULL DEFAULT 200,
 			body TEXT
 		);
 		INSERT INTO setting (option, value)
@@ -88,15 +89,15 @@ func (s *SQLiteDB) TableExists(tableName string) bool {
 
 func (s *SQLiteDB) AddRoute(route Route) error {
 	query := `
-		INSERT INTO route (url, method, headers, body)
-		VALUES (?, ?, ?, ?)
+		INSERT INTO route (url, method, headers, status_code, body)
+		VALUES (?, ?, ?, ?, ?)
 	`
 	headersJSON, err := json.Marshal(route.Headers)
 	if err != nil {
 		return err
 	}
 
-	_, err = s.db.Exec(query, route.Url, route.Method, headersJSON, route.Body)
+	_, err = s.db.Exec(query, route.Url, route.Method, headersJSON, route.StatusCode, route.Body)
 	if err != nil {
 		return err
 	}
@@ -107,7 +108,7 @@ func (s *SQLiteDB) AddRoute(route Route) error {
 func (s *SQLiteDB) EditRoute(route Route) error {
 	query := `
 		UPDATE route
-		SET url = ?, method = ?, headers = ?, body = ?
+		SET url = ?, method = ?, headers = ?, status_code = ?, body = ?
 		WHERE id = ?
 	`
 	headersJSON, err := json.Marshal(route.Headers)
@@ -115,7 +116,7 @@ func (s *SQLiteDB) EditRoute(route Route) error {
 		return err
 	}
 
-	_, err = s.db.Exec(query, route.Url, route.Method, headersJSON, route.Body, route.Id)
+	_, err = s.db.Exec(query, route.Url, route.Method, headersJSON, route.StatusCode, route.Body, route.Id)
 	if err != nil {
 		return err
 	}
@@ -138,7 +139,7 @@ func (s *SQLiteDB) DeleteRoute(route Route) error {
 
 func (s *SQLiteDB) GetRoutes() ([]Route, error) {
 	query := `
-		SELECT id, url, method, headers, body
+		SELECT id, url, method, headers, status_code, body
 		FROM route
 	`
 	rows, err := s.db.Query(query)
@@ -162,7 +163,7 @@ func (s *SQLiteDB) GetRoutes() ([]Route, error) {
 
 func (s *SQLiteDB) GetRoute(url string, method string) (Route, error) {
 	query := `
-		SELECT id, url, method, headers, body
+		SELECT id, url, method, headers, status_code, body
 		FROM route
 		WHERE url = ? AND method = ?
 	`
