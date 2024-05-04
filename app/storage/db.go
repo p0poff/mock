@@ -139,7 +139,7 @@ func (s *SQLiteDB) DeleteRoute(route Route) error {
 
 func (s *SQLiteDB) GetRoutes() ([]Route, error) {
 	query := `
-		SELECT id, url, method, headers, status_code, body
+		SELECT id, url, method, json('{}'), status_code, ''
 		FROM route
 	`
 	rows, err := s.db.Query(query)

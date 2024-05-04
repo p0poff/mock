@@ -24,12 +24,37 @@ function TableConstructor(app) {
     };
 }
 
-// Usage example
-const appData = [
-    { name: 'John', age: 25, gender: 'Male' },
-    { name: 'Jane', age: 30, gender: 'Female' },
-    { name: 'Bob', age: 35, gender: 'Male' }
-];
+const server_data = {
+    data: [],
+    fGetAll: function() {
+        apiUrl = './admin/get-routers'
+        return fetch(apiUrl)  // Возвращает Promise
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                this.data = data;
+                return data;  // Важно возвращать данные для дальнейшей обработки
+            })
+            .catch(error => {
+                this.data = [];
+                console.error('There was a problem with the fetch operation:', error);
+                return [];  // Возвращаем пустой массив при ошибке
+            });
+    }
+};
 
-const tableConstructor = new TableConstructor(appData);
-tableConstructor.fillTable();
+const routers = {
+    data: [],
+    fUpdateData: function() {
+        server_data.fGetAll().then(data => {
+            this.data = data;  // Обновляем данные только после завершения промиса
+            console.log(this.data);  // Перемещаем вывод в консоль сюда для корректного отображения данных
+        });
+    }
+}
+
+routers.fUpdateData();
