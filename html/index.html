@@ -22,21 +22,25 @@
             <th scope="col">Options</th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
-            <td>1</td>
-            <th scope="row">api/v1/comm_calendar/events</th>
-            <td>GET</td>
-            <td>200</td>
-            <td>
-              <div role="group">
-                <button class="contrast">Edit</button>
-                <button class="secondary">Del</button>
-              </div>
-          </tr>
+        <tbody id="table_body">
+          
         </table>
         <div role="button">ADD Route</div>
       </main>
+
+      <template id="table_row">
+        <tr>
+          <td class="row_id">1</td>
+          <th scope="row" class="row_route">api/v1/comm_calendar/events</th>
+          <td class="row_method">GET</td>
+          <td class="row_code">200</td>
+          <td>
+            <div role="group">
+              <button class="contrast row_edit_btn">Edit</button>
+              <button class="secondary row_del_btn">Del</button>
+            </div>
+        </tr>
+      </template>
 
       <script src="./html/mock.js"></script>
   </body>

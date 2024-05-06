@@ -24,37 +24,91 @@ function TableConstructor(app) {
     };
 }
 
-const server_data = {
-    data: [],
+const routers = {
     fGetAll: function() {
         apiUrl = './admin/get-routers'
-        return fetch(apiUrl)  // Возвращает Promise
-            .then(response => {
+        fetch(apiUrl) 
+        .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok ' + response.statusText);
                 }
                 return response.json();
             })
             .then(data => {
-                this.data = data;
-                return data;  // Важно возвращать данные для дальнейшей обработки
+                table.fGetTable(data);
             })
             .catch(error => {
-                this.data = [];
                 console.error('There was a problem with the fetch operation:', error);
-                return [];  // Возвращаем пустой массив при ошибке
             });
+        },
+        
+    fDelRoute: function(id) {
+        apiUrl = './admin/delete-route'
+        fetch(apiUrl, {
+            method: 'POST', // Specifying the HTTP method
+            headers: {
+                'Content-Type': 'application/json', // Indicating the media type of the resource
+            },
+            body: JSON.stringify({Id: id}), // Converting the JavaScript object into a JSON string
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return null; // Parsing JSON from the response
+        })
+        .then(data => {
+            // Use the JSON data from the server
+            routers.fGetAll();
+        })
+        .catch(error => {
+            // Handle any errors
+            console.error('There was a problem with the fetch operation:', error);
+        });
+    },
+
+    fEditRoute: function(id) {
+        console.log(id);
     }
 };
 
-const routers = {
-    data: [],
-    fUpdateData: function() {
-        server_data.fGetAll().then(data => {
-            this.data = data;  // Обновляем данные только после завершения промиса
-            console.log(this.data);  // Перемещаем вывод в консоль сюда для корректного отображения данных
+const table = {
+    template: document.getElementById("table_row"),
+    container: document.getElementById("table_body"),
+    fGetRow: function(row_data) {
+        const instance = document.importNode(this.template.content, true);
+        instance.querySelector(".row_id").textContent = row_data.Id;
+        instance.querySelector(".row_route").textContent = row_data.Url;
+        instance.querySelector(".row_method").textContent = row_data.Method;
+        instance.querySelector(".row_code").textContent = row_data.status_code;
+
+        const del_btn = instance.querySelector('.row_del_btn');
+        const edit_btn = instance.querySelector('.row_edit_btn');
+        
+        del_btn.onclick = function() {
+            if (confirm('Sure?')) {
+                routers.fDelRoute(row_data.Id)
+            }
+        };
+
+        edit_btn.onclick = function() {
+            routers.fEditRoute(row_data.Id)
+        };
+
+        return instance;
+    },
+
+    fGetTable: function(data) {
+        this.fClearTable();
+        data.forEach(function(row, index) {
+            table.container.appendChild(table.fGetRow(row));
         });
+    },
+
+    fClearTable: function() {
+        this.container.innerHTML = '';
     }
 }
 
-routers.fUpdateData();
+
+routers.fGetAll();
