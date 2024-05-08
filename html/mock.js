@@ -1,29 +1,3 @@
-function TableConstructor(app) {
-    this.app = app;
-
-    this.fillTable = function() {
-        // Get the table element from the DOM
-        const table = document.getElementById('myTable');
-
-        // Clear the table
-        table.innerHTML = '';
-
-        // Loop through the app data and create table rows
-        for (let i = 0; i < this.app.length; i++) {
-            const row = table.insertRow();
-
-            // Create table cells and populate them with data
-            const cell1 = row.insertCell();
-            const cell2 = row.insertCell();
-            const cell3 = row.insertCell();
-
-            cell1.innerHTML = this.app[i].name;
-            cell2.innerHTML = this.app[i].age;
-            cell3.innerHTML = this.app[i].gender;
-        }
-    };
-}
-
 const routers = {
     fGetAll: function() {
         apiUrl = './admin/get-routers'
@@ -45,32 +19,20 @@ const routers = {
         
     fDelRoute: function(id) {
         apiUrl = './admin/delete-route'
-        fetch(apiUrl, {
-            method: 'POST', // Specifying the HTTP method
-            headers: {
-                'Content-Type': 'application/json', // Indicating the media type of the resource
-            },
-            body: JSON.stringify({Id: id}), // Converting the JavaScript object into a JSON string
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return null; // Parsing JSON from the response
-        })
-        .then(data => {
-            // Use the JSON data from the server
-            routers.fGetAll();
-        })
-        .catch(error => {
-            // Handle any errors
-            console.error('There was a problem with the fetch operation:', error);
-        });
+        this.fRequest(apiUrl, {Id: id});
     },
 
     fAddRoute: function(data) {
         apiUrl = './admin/add-route'
-        fetch(apiUrl, {
+        this.fRequest(apiUrl, data);
+    },
+
+    fEditRoute: function(id) {
+        console.log(id);
+    },
+
+    fRequest: function(uri, data) {
+        fetch(uri, {
             method: 'POST', // Specifying the HTTP method
             headers: {
                 'Content-Type': 'application/json', // Indicating the media type of the resource
@@ -91,10 +53,6 @@ const routers = {
             // Handle any errors
             console.error('There was a problem with the fetch operation:', error);
         });
-    },
-
-    fEditRoute: function(id) {
-        console.log(id);
     }
 };
 
