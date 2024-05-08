@@ -131,12 +131,6 @@ const modal = {
         });
     },
     
-    fClose: function() {
-        if (this.dialog.hasAttribute('open')) {
-            this.dialog.removeAttribute('open');
-        }
-    },
-
     fSetData: function(data) {
         if (data == null) {
             this.id.value = null;
@@ -156,13 +150,18 @@ const modal = {
     },
 
     fGetData: function() {
-        data =  {
-            Url: this.route.value,
-            Method: this.method.value,
-            status_code: parseInt(this.code.value, 10),
-            Headers: JSON.parse(this.headers.value),
-            Body: this.body.value
-        };
+        try {
+            data =  {
+                Url: this.route.value,
+                Method: this.method.value,
+                status_code: parseInt(this.code.value, 10),
+                Headers: JSON.parse(this.headers.value || '{}'),
+                Body: this.body.value
+            };
+        } catch {
+            this.fMarkHeaders()
+            throw new Error('Headers JSON is wrong');
+        }
 
         if (this.id.value != '') {
             data.Id = parseInt(this.id.value, 10);
@@ -171,12 +170,31 @@ const modal = {
         return data;
     },
 
+    fMarkHeaders: function() {
+        if (!this.headers.hasAttribute('aria-invalid')) {
+            this.headers.setAttribute('aria-invalid', 'true');
+        }
+    },
+
+    fUnmarkHeaders: function() {
+        if (this.headers.hasAttribute('aria-invalid')) {
+            this.headers.removeAttribute('aria-invalid');
+        }
+    },
+
     fOpen: function(data) {
+        this.fUnmarkHeaders();
         this.fSetData(data);
         if (!this.dialog.hasAttribute('open')) {
             this.dialog.setAttribute('open', '');
         }
-    }
+    },
+
+    fClose: function() {
+        if (this.dialog.hasAttribute('open')) {
+            this.dialog.removeAttribute('open');
+        }
+    },
 }
 
 modal.fInit();
