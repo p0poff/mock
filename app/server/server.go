@@ -22,23 +22,6 @@ func NewServer(port string, db *storage.SQLiteDB) *Server {
 	return s
 }
 
-func (s *Server) defaultHandler(w http.ResponseWriter, r *http.Request) {
-	uri := r.URL.Path
-	method := r.Method
-
-	log.Printf("[INFO] request method: %s", method)
-
-	// Return JSON response
-	response := map[string]string{"uri": uri}
-	jsonResponse, err := json.Marshal(response)
-	if err != nil {
-		log.Println("[ERROR] Failed to marshal JSON response:", err)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(jsonResponse)
-}
-
 func (s *Server) adminindexHandler(w http.ResponseWriter, r *http.Request) {
 	// Open the HTML file
 	file, err := os.Open("./html/index.html")
@@ -202,7 +185,6 @@ func (s *Server) Start() error {
 	log.Printf("[INFO] Server start! port: %s", addr)
 
 	//routing
-	// http.HandleFunc("/", s.defaultHandler)
 	http.HandleFunc("/admin", s.adminindexHandler)
 	http.HandleFunc("/admin/save-route", s.adminSaveRouteHandler)
 	http.HandleFunc("/admin/get-routes", s.adminGetRoutesHandler)
