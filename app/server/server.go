@@ -66,7 +66,7 @@ func (s *Server) adminindexHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeContent(w, r, "index.html", fileInfo.ModTime(), file)
 }
 
-func (s *Server) adminAddRouteHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) adminSaveRouteHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
@@ -80,38 +80,23 @@ func (s *Server) adminAddRouteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = s.db.AddRoute(route)
+	if route.Id < 1 {
+		err = s.db.AddRoute(route)
+	} else {
+		err = s.db.EditRoute(route)
+	}
+
 	if err != nil {
 		log.Println("[ERROR] Failed to add route:", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-}
-
-func (s *Server) adminEditRouteHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-		return
+	if route.Id < 1 {
+		w.WriteHeader(http.StatusCreated)
+	} else {
+		w.WriteHeader(http.StatusNoContent)
 	}
-
-	var route storage.Route
-	err := json.NewDecoder(r.Body).Decode(&route)
-	if err != nil {
-		log.Println("[ERROR] Failed to decode JSON request:", err)
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-
-	err = s.db.EditRoute(route)
-	if err != nil {
-		log.Println("[ERROR] Failed to edit route:", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusNoContent)
 }
 
 func (s *Server) adminDeleteRouteHandler(w http.ResponseWriter, r *http.Request) {
@@ -219,10 +204,9 @@ func (s *Server) Start() error {
 	//routing
 	// http.HandleFunc("/", s.defaultHandler)
 	http.HandleFunc("/admin", s.adminindexHandler)
-	http.HandleFunc("/admin/add-route", s.adminAddRouteHandler)
+	http.HandleFunc("/admin/save-route", s.adminSaveRouteHandler)
 	http.HandleFunc("/admin/get-routes", s.adminGetRoutesHandler)
 	http.HandleFunc("/admin/get-route", s.adminGetRouteHandler)
-	http.HandleFunc("/admin/edit-route", s.adminEditRouteHandler)
 	http.HandleFunc("/admin/delete-route", s.adminDeleteRouteHandler)
 	http.HandleFunc("/", s.mockHandler)
 
@@ -231,8 +215,4 @@ func (s *Server) Start() error {
 	http.Handle("/html/", http.StripPrefix("/html/", fs))
 
 	return http.ListenAndServe(addr, nil)
-}
-
-func (s *Server) Stop() {
-	// Add your server shutdown logic here
 }

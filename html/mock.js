@@ -23,13 +23,8 @@ const routers = {
         this.fRequest(apiUrl, {Id: id}, function() {routers.fGetAll();});
     },
 
-    fAddRoute: function(data) {
-        apiUrl = './admin/add-route'
-        this.fRequest(apiUrl, data, function() {routers.fGetAll();});
-    },
-
-    fEditRoute: function(data) {
-        apiUrl = './admin/edit-route'
+    fSaveRoute: function(data) {
+        apiUrl = './admin/save-route'
         this.fRequest(apiUrl, data, function() {routers.fGetAll();});
     },
 
@@ -115,7 +110,6 @@ const modal = {
     add_btn: document.getElementById("add_route_btn"),   
 
 
-    title: document.getElementById("modal_title"),
     id: document.getElementById("modal_data_id"),
     route: document.getElementById("modal_data_route"),
     method: document.getElementById("modal_data_method"),
@@ -133,7 +127,7 @@ const modal = {
         });
 
         this.submit_btn.addEventListener('click', function() {
-            routers.fAddRoute(modal.fGetData())
+            routers.fSaveRoute(modal.fGetData())
         });
     },
     
