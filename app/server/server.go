@@ -138,7 +138,39 @@ func (s *Server) adminDeleteRouteHandler(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (s *Server) adminGetRoutersHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) adminGetRouteHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var ro storage.Route
+	err := json.NewDecoder(r.Body).Decode(&ro)
+	if err != nil {
+		log.Println("[ERROR] Failed to decode JSON request:", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	route, err := s.db.GetRouteById(ro.Id)
+	if err != nil {
+		log.Println("[ERROR] Failed to get route:", err)
+
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
+	}
+
+	jsonResponse, err := json.Marshal(route)
+	if err != nil {
+		log.Println("[ERROR] Failed to marshal JSON response:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonResponse)
+}
+
+func (s *Server) adminGetRoutesHandler(w http.ResponseWriter, r *http.Request) {
 	routers, err := s.db.GetRoutes()
 	if err != nil {
 		log.Println("[ERROR] Failed to get routers:", err)
@@ -188,7 +220,8 @@ func (s *Server) Start() error {
 	// http.HandleFunc("/", s.defaultHandler)
 	http.HandleFunc("/admin", s.adminindexHandler)
 	http.HandleFunc("/admin/add-route", s.adminAddRouteHandler)
-	http.HandleFunc("/admin/get-routers", s.adminGetRoutersHandler)
+	http.HandleFunc("/admin/get-routes", s.adminGetRoutesHandler)
+	http.HandleFunc("/admin/get-route", s.adminGetRouteHandler)
 	http.HandleFunc("/admin/edit-route", s.adminEditRouteHandler)
 	http.HandleFunc("/admin/delete-route", s.adminDeleteRouteHandler)
 	http.HandleFunc("/", s.mockHandler)

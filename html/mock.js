@@ -1,6 +1,7 @@
 const routers = {
+    data: null,
     fGetAll: function() {
-        apiUrl = './admin/get-routers'
+        apiUrl = './admin/get-routes'
         fetch(apiUrl) 
         .then(response => {
                 if (!response.ok) {
@@ -19,19 +20,27 @@ const routers = {
         
     fDelRoute: function(id) {
         apiUrl = './admin/delete-route'
-        this.fRequest(apiUrl, {Id: id});
+        this.fRequest(apiUrl, {Id: id}, function() {routers.fGetAll();});
     },
 
     fAddRoute: function(data) {
         apiUrl = './admin/add-route'
-        this.fRequest(apiUrl, data);
+        this.fRequest(apiUrl, data, function() {routers.fGetAll();});
     },
 
-    fEditRoute: function(id) {
-        console.log(id);
+    fEditRoute: function(data) {
+        apiUrl = './admin/edit-route'
+        this.fRequest(apiUrl, data, function() {routers.fGetAll();});
     },
 
-    fRequest: function(uri, data) {
+    fGetRoute: function(id) {
+        apiUrl = './admin/get-route'
+        this.fRequest(apiUrl, {Id: id}, function() {
+            modal.fOpen(routers.data);
+        });
+    },
+
+    fRequest: function(uri, data, f) {
         fetch(uri, {
             method: 'POST', // Specifying the HTTP method
             headers: {
@@ -43,11 +52,16 @@ const routers = {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            return null; // Parsing JSON from the response
+            if (response.status != 200) {
+                return null;
+            }
+
+            return response.json(); // Parsing JSON from the response
         })
         .then(data => {
             // Use the JSON data from the server
-            routers.fGetAll();
+            routers.data = data;
+            f();
         })
         .catch(error => {
             // Handle any errors
@@ -76,7 +90,7 @@ const table = {
         };
 
         edit_btn.onclick = function() {
-            routers.fEditRoute(row_data.Id)
+            routers.fGetRoute(row_data.Id)
         };
 
         return instance;
@@ -142,7 +156,7 @@ const modal = {
             this.route.value = data.Url;
             this.method.value = data.Method;
             this.code.value = data.status_code;
-            this.headers.value = data.Headers;
+            this.headers.value = JSON.stringify(data.Headers);
             this.body.value = data.Body;
         }
     },
