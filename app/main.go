@@ -8,8 +8,8 @@ import "github.com/p0poff/mock/app/storage"
 import "github.com/p0poff/mock/app/server"
 
 type opts struct {
-	FileDb  string `short:"f" long:"filedb" env:"FILE_DB" description:"file db path db" required:"true"`
-	FileLog string `short:"l" long:"filelog" env:"FILE_LOG"  description:"location of spam log" required:"true"`
+	FileDb  string `short:"f" long:"filedb" env:"FILE_DB" default:"mock.db" description:"file db path db" required:"true"`
+	FileLog string `short:"l" long:"filelog" env:"FILE_LOG" default:"mock.log" description:"file log" required:"true"`
 	Port    string `short:"p" long:"port" env:"PORT" default:"8080" description:"port to listen on"`
 }
 

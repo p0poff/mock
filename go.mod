@@ -1,6 +1,6 @@
 module github.com/p0poff/mock
 
-go 1.22.2
+go 1.22.1
 
 require (
 	github.com/jessevdk/go-flags v1.5.0 // indirect
