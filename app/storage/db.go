@@ -97,7 +97,7 @@ func (s *SQLiteDB) AddRoute(route Route) error {
 		return err
 	}
 
-	_, err = s.db.Exec(query, route.Url, route.Method, headersJSON, route.StatusCode, route.Body)
+	_, err = s.db.Exec(query, ensureSlashPrefix(route.Url), route.Method, headersJSON, route.StatusCode, route.Body)
 	if err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ func (s *SQLiteDB) EditRoute(route Route) error {
 		return err
 	}
 
-	_, err = s.db.Exec(query, route.Url, route.Method, headersJSON, route.StatusCode, route.Body, route.Id)
+	_, err = s.db.Exec(query, ensureSlashPrefix(route.Url), route.Method, headersJSON, route.StatusCode, route.Body, route.Id)
 	if err != nil {
 		return err
 	}
