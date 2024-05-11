@@ -170,6 +170,10 @@ func (s *Server) adminLogRoutesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResponse)
 }
 
+func (s *Server) mockFaviconHandler(w http.ResponseWriter, r *http.Request) {
+	http.Error(w, "Not found", http.StatusNotFound)
+}
+
 func (s *Server) mockHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[INFO] request uri (method): %s (%s)", r.URL.Path, r.Method)
 
@@ -209,6 +213,7 @@ func (s *Server) Start() error {
 	http.HandleFunc("/admin/get-route", s.adminGetRouteHandler)
 	http.HandleFunc("/admin/delete-route", s.adminDeleteRouteHandler)
 	http.HandleFunc("/admin/log-route", s.adminLogRoutesHandler)
+	http.HandleFunc("/favicon.ico", s.mockFaviconHandler)
 	http.HandleFunc("/", s.mockHandler)
 
 	//static
