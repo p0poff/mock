@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"github.com/p0poff/mock/app/circular_stack"
 	"github.com/p0poff/mock/app/storage"
 	"log"
 	"net/http"
@@ -9,14 +10,16 @@ import (
 )
 
 type Server struct {
-	port string
-	db   *storage.SQLiteDB
+	port  string
+	db    *storage.SQLiteDB
+	stack *circular_stack.CircularStack
 }
 
-func NewServer(port string, db *storage.SQLiteDB) *Server {
+func NewServer(port string, db *storage.SQLiteDB, stack *circular_stack.CircularStack) *Server {
 	s := &Server{
-		port: port,
-		db:   db,
+		port:  port,
+		db:    db,
+		stack: stack,
 	}
 
 	return s
@@ -155,8 +158,23 @@ func (s *Server) adminGetRoutesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResponse)
 }
 
+func (s *Server) adminLogRoutesHandler(w http.ResponseWriter, r *http.Request) {
+	routers := s.stack.All()
+	jsonResponse, err := json.Marshal(routers)
+	if err != nil {
+		log.Println("[ERROR] Failed to marshal JSON response:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonResponse)
+}
+
 func (s *Server) mockHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[INFO] request uri (method): %s (%s)", r.URL.Path, r.Method)
+
+	s.stack.Push(storage.Route{Url: r.URL.Path, Method: r.Method})
+
 	// Get the route from the database
 	route, err := s.db.GetRoute(r.URL.Path, r.Method)
 	if err != nil {
@@ -190,6 +208,7 @@ func (s *Server) Start() error {
 	http.HandleFunc("/admin/get-routes", s.adminGetRoutesHandler)
 	http.HandleFunc("/admin/get-route", s.adminGetRouteHandler)
 	http.HandleFunc("/admin/delete-route", s.adminDeleteRouteHandler)
+	http.HandleFunc("/admin/log-route", s.adminLogRoutesHandler)
 	http.HandleFunc("/", s.mockHandler)
 
 	//static
