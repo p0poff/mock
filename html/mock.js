@@ -2,40 +2,54 @@ const routers = {
     data: null,
     fGetAll: function() {
         apiUrl = './admin/get-routes'
-        fetch(apiUrl) 
-        .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok ' + response.statusText);
-                }
-                return response.json();
-            })
-            .then(data => {
-                modal.fClose();
-                table.fGetTable(data);
-            })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-            });
-        },
+        this.fRequestGet(apiUrl, function() {
+            modal.fClose();
+            table.fGetTable(routers.data);
+        })
+    },
+
+    fGetLog: function() {
+        apiUrl = './admin/log-route'
+        this.fRequestGet(apiUrl, function() {
+            modal.fRefreshLog(routers.data);
+        })
+    },
         
     fDelRoute: function(id) {
         apiUrl = './admin/delete-route'
-        this.fRequest(apiUrl, {Id: id}, function() {routers.fGetAll();});
+        this.fRequestPost(apiUrl, {Id: id}, function() {routers.fGetAll();});
     },
 
     fSaveRoute: function(data) {
         apiUrl = './admin/save-route'
-        this.fRequest(apiUrl, data, function() {routers.fGetAll();});
+        this.fRequestPost(apiUrl, data, function() {routers.fGetAll();});
     },
 
     fGetRoute: function(id) {
         apiUrl = './admin/get-route'
-        this.fRequest(apiUrl, {Id: id}, function() {
+        this.fRequestPost(apiUrl, {Id: id}, function() {
             modal.fOpen(routers.data);
         });
     },
 
-    fRequest: function(uri, data, f) {
+    fRequestGet: function(uri, f) {
+        fetch(uri) 
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            routers.data = data;
+            f();
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+    },
+
+    fRequestPost: function(uri, data, f) {
         fetch(uri, {
             method: 'POST', // Specifying the HTTP method
             headers: {
@@ -109,6 +123,12 @@ const modal = {
     submit_btn: document.getElementById("modal_submit_btn"),   
     add_btn: document.getElementById("add_route_btn"),   
 
+    log_dialog: document.getElementById("modal_dialog_log"),
+    log_area: document.getElementById("modal_log_area"),
+    log_close_btn: document.getElementById("modal_log_close_btn"),
+    log_refresh_btn: document.getElementById("modal_log_refresh_btn"),
+    log_open_btn: document.getElementById("open_log_btn"),
+    log_template: document.getElementById("log_row"),
 
     id: document.getElementById("modal_data_id"),
     route: document.getElementById("modal_data_route"),
@@ -128,6 +148,18 @@ const modal = {
 
         this.submit_btn.addEventListener('click', function() {
             routers.fSaveRoute(modal.fGetData())
+        });
+
+        this.log_open_btn.addEventListener('click', function() {
+            modal.fLogOpen()
+        });
+
+        this.log_close_btn.addEventListener('click', function() {
+            modal.fLogClose()
+        });
+
+        this.log_refresh_btn.addEventListener('click', function() {
+            routers.fGetLog()
         });
     },
     
@@ -195,6 +227,38 @@ const modal = {
             this.dialog.removeAttribute('open');
         }
     },
+
+    fLogOpen: function(data) {
+        routers.fGetLog()
+        if (!this.log_dialog.hasAttribute('open')) {
+            this.log_dialog.setAttribute('open', '');
+        }
+    },
+
+    fLogClose: function() {
+        if (this.log_dialog.hasAttribute('open')) {
+            this.log_dialog.removeAttribute('open');
+        }
+    },
+
+    fGetRow: function(row_data) {
+        const instance = document.importNode(this.log_template.content, true);
+        instance.querySelector(".log_row_url").textContent = row_data.Url;
+        instance.querySelector(".log_row_method").textContent = row_data.Method;
+
+        return instance;
+    },
+
+    fRefreshLog: function(data) {
+        this.fClearLog();
+        data.forEach(function(row, index) {
+            modal.log_area.appendChild(modal.fGetRow(row));
+        });
+    },
+
+    fClearLog: function() {
+        this.log_area.innerHTML = '';
+    }
 }
 
 modal.fInit();

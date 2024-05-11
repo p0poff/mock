@@ -11,7 +11,11 @@
     <main class="container">
       <h1>Mock server admin panel</h1>
       
-      <h3>Routing</h3>
+      <div role="group">
+        <h3>Routing</h3>
+        <div></div>
+        <button id="open_log_btn">Requests log</button>
+      </div>
       <table>
         <thead data-theme="dark">
           <tr>
@@ -37,6 +41,7 @@
           <td>
             <div role="group">
               <button class="contrast row_edit_btn">Edit</button>
+              <div></div>
               <button class="secondary row_del_btn">Del</button>
             </div>
         </tr>
@@ -86,6 +91,27 @@
           
         </article>
       </dialog>
+
+      <dialog id="modal_dialog_log">
+        <article>
+          <header>
+            <button id="modal_log_close_btn" aria-label="Close" rel="prev"></button>
+            <p>
+              <strong>Requests log</strong>
+            </p>
+          </header>
+          <div class="container">
+            <table id="modal_log_area"></table>
+          </div>
+          <div id="modal_log_refresh_btn" role="button">Refresh requests</div>
+        </article>
+      </dialog>
+
+      <template id="log_row">
+        <tr>
+          <td class="log_row_method"></td><td class="log_row_url"></td>
+        </tr>
+      </template>
 
       <script src="./html/mock.js"></script>
   </body>
