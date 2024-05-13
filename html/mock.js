@@ -243,6 +243,7 @@ const modal = {
 
     fGetRow: function(row_data) {
         const instance = document.importNode(this.log_template.content, true);
+        instance.querySelector(".log_row_date").textContent = row_data.Date;
         instance.querySelector(".log_row_url").textContent = row_data.Url;
         instance.querySelector(".log_row_method").textContent = row_data.Method;
 

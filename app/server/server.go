@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 type Server struct {
@@ -177,7 +178,7 @@ func (s *Server) mockFaviconHandler(w http.ResponseWriter, r *http.Request) {
 func (s *Server) mockHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[INFO] request uri (method): %s (%s)", r.URL.Path, r.Method)
 
-	s.stack.Push(storage.Route{Url: r.URL.Path, Method: r.Method})
+	s.stack.Push(storage.Request{Date: time.Now().Format("2006-01-02 15:04:05"), Url: r.URL.Path, Method: r.Method})
 
 	// Get the route from the database
 	route, err := s.db.GetRoute(r.URL.Path, r.Method)

@@ -14,3 +14,9 @@ type Setting struct {
 	Option string
 	Value  string
 }
+
+type Request struct {
+	Date   string
+	Url    string
+	Method string
+}

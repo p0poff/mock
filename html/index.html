@@ -100,16 +100,16 @@
               <strong>Requests log</strong>
             </p>
           </header>
-          <div class="container">
-            <table id="modal_log_area"></table>
-          </div>
+          <div class="container" style="overflow-x: scroll;">
+            <table id="modal_log_area" style="width: 150%;"></table>
+          </div> 
           <div id="modal_log_refresh_btn" role="button">Refresh requests</div>
         </article>
       </dialog>
 
       <template id="log_row">
         <tr>
-          <td class="log_row_method"></td><td class="log_row_url"></td>
+          <td class="log_row_date"></td><td class="log_row_method"></td><td class="log_row_url"></td>
         </tr>
       </template>
       <footer class="container">
