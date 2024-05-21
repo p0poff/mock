@@ -47,7 +47,7 @@ func main() {
 		return
 	}
 
-	db, err := storage.NewSQLiteDB(sqlite)
+	db, err := storage.GetDB(sqlite, opts.FileDb)
 	if err != nil {
 		fmt.Println("Error creating SQLiteDB:", err)
 		return

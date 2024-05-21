@@ -8,16 +8,18 @@ import (
 )
 
 type SQLiteDB struct {
-	db *sql.DB
+	db       *sql.DB
+	FilePath string
 }
 
 type scanner interface {
 	Scan(dest ...interface{}) error
 }
 
-func NewSQLiteDB(db *sql.DB) (*SQLiteDB, error) {
+func GetDB(db *sql.DB, filePath string) (*SQLiteDB, error) {
 	return &SQLiteDB{
-		db: db,
+		db:       db,
+		FilePath: filePath,
 	}, nil
 }
 

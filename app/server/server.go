@@ -26,6 +26,32 @@ func NewServer(port string, db *storage.SQLiteDB, stack *circular_stack.Circular
 	return s
 }
 
+func (s *Server) adminExportDbHandler(w http.ResponseWriter, r *http.Request) {
+	file, err := os.Open(s.db.FilePath)
+
+	if err != nil {
+		// If there's an error opening the file, log it and send an internal server error
+		log.Println("Error opening db file:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	defer file.Close()
+
+	fileInfo, err := file.Stat()
+	if err != nil {
+		// If there's an error getting file info, log it and send an internal server error
+		log.Println("Error getting db file info:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	// Set the header to HTML (this is not always necessary but good for correctness)
+	w.Header().Set("Content-Type", "sqlite/db")
+
+	// Serve the HTML file
+	http.ServeContent(w, r, "export.db", fileInfo.ModTime(), file)
+}
+
 func (s *Server) adminindexHandler(w http.ResponseWriter, r *http.Request) {
 	// Open the HTML file
 	file, err := os.Open("./html/index.html")
@@ -214,6 +240,7 @@ func (s *Server) Start() error {
 	http.HandleFunc("/admin/get-route", s.adminGetRouteHandler)
 	http.HandleFunc("/admin/delete-route", s.adminDeleteRouteHandler)
 	http.HandleFunc("/admin/log-route", s.adminLogRoutesHandler)
+	http.HandleFunc("/admin/export.db", s.adminExportDbHandler)
 	http.HandleFunc("/favicon.ico", s.mockFaviconHandler)
 	http.HandleFunc("/", s.mockHandler)
 
