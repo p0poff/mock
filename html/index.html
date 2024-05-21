@@ -6,6 +6,9 @@
     <meta name="color-scheme" content="light dark" />
     <link rel="stylesheet" href="./html/pico.amber.min.css">
     <title>Simple mock server</title>
+    <style>
+      .label_70 {font-size: 70%;}
+    </style>
   </head>
   <body>
     <main class="container">
@@ -60,31 +63,47 @@
           </header>
           <div class="container">
             <input type="hidden" id="modal_data_id" name="id" />
-            <input type="text" id="modal_data_route" name="route" placeholder="/" aria-label="route" />
+            <label class="label_70">
+              Route
+              <input type="text" id="modal_data_route" name="route" placeholder="/" aria-label="route" />
+            </label>
             <div class="grid">
-              <select id="modal_data_method" name="method" aria-label="method" required>
-                <option selected disabled value="">
-                  Select method...
-                </option>
-                <option>GET</option>
-                <option>POST</option>
-                <option>PUT</option>
-                <option>DELETE</option>
-              </select>
-              <input type="number" id="modal_data_code" name="code" placeholder="status code" aria-label="code" />
+              <label class="label_70">
+                Method
+                <select id="modal_data_method" name="method" aria-label="method" required>
+                  <option selected disabled value="">
+                    Select method...
+                  </option>
+                  <option>GET</option>
+                  <option>POST</option>
+                  <option>PUT</option>
+                  <option>DELETE</option>
+                </select>
+              </label>
+              <label class="label_70">
+                Status code
+                <input type="number" id="modal_data_code" name="code" placeholder="status code" aria-label="code" />
+              </label>
             </div>
-            <textarea
-              id="modal_data_headers"
-              name="headers"
-              placeholder="headers, must valid JSON"
-              aria-label="headers"
-            ></textarea>
-            <textarea
-              id="modal_data_body"
-              name="body"
-              placeholder="body"
-              aria-label="body"
-            ></textarea>
+            <label class="label_70">
+              Default headers {"Content-Type", "application/json"}<br />
+              Can be redefined
+              <textarea
+                id="modal_data_headers"
+                name="headers"
+                placeholder="headers, must valid JSON1"
+                aria-label="headers"
+              ></textarea>
+            </label>
+            <label class="label_70">
+              Can be every type, but for a correct answer, the type must match the header "Content-Type"
+              <textarea
+                id="modal_data_body"
+                name="body"
+                placeholder="body"
+                aria-label="body"
+              ></textarea>
+            </label>  
             <input
               id="modal_submit_btn"
               type="submit"
@@ -116,7 +135,7 @@
         </tr>
       </template>
       <footer class="container">
-        v 0.0.2
+        v 0.0.3
       </footer>
 
       <script src="./html/mock.js"></script>
