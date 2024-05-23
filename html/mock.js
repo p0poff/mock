@@ -76,6 +76,27 @@ const routers = {
             // Handle any errors
             console.error('There was a problem with the fetch operation:', error);
         });
+    },
+
+    fUploadFile: function(file) {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        // Отправка формы с использованием Fetch API
+        fetch('./admin/upload-file', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("File uploaded successfully:", data);
+            modal.fUploadSetError("");
+            modal.fUploadClose();
+        })
+        .catch(error => {
+            modal.fUploadSetError("Error uploading file: " + error);
+            console.error("Error uploading file:", error);
+        });
     }
 };
 
@@ -129,6 +150,14 @@ const modal = {
     log_refresh_btn: document.getElementById("modal_log_refresh_btn"),
     log_open_btn: document.getElementById("open_log_btn"),
     log_template: document.getElementById("log_row"),
+    
+    upload_dialog: document.getElementById("modal_dialog_upload_file"),
+    upload_form: document.getElementById("modal_upload_form"),
+    upload_file: document.getElementById("modal_upload_file"),
+    upload_close_btn: document.getElementById("modal_upload_file_close_btn"),
+    upload_error: document.getElementById("modal_upload_error"),
+
+    upload_open_btn: document.getElementById("import_db_btn"),
 
     id: document.getElementById("modal_data_id"),
     route: document.getElementById("modal_data_route"),
@@ -160,6 +189,25 @@ const modal = {
 
         this.log_refresh_btn.addEventListener('click', function() {
             routers.fGetLog()
+        });
+
+        this.upload_open_btn.addEventListener('click', function() {
+            modal.upload_file.removeAttribute('aria-invalid');
+            modal.fUploadOpen()
+        });
+
+        this.upload_close_btn.addEventListener('click', function() {
+            modal.fUploadClose()
+        });
+
+        this.upload_form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            let file = modal.upload_file.files[0];
+            if (file == undefined) {
+                modal.upload_file.setAttribute('aria-invalid', 'true');
+                return;
+            }
+            routers.fUploadFile(file)
         });
     },
     
@@ -239,6 +287,22 @@ const modal = {
         if (this.log_dialog.hasAttribute('open')) {
             this.log_dialog.removeAttribute('open');
         }
+    },
+
+    fUploadOpen: function(data) {
+        if (!this.upload_dialog.hasAttribute('open')) {
+            this.upload_dialog.setAttribute('open', '');
+        }
+    },
+
+    fUploadClose: function() {
+        if (this.upload_dialog.hasAttribute('open')) {
+            this.upload_dialog.removeAttribute('open');
+        }
+    },
+
+    fUploadSetError: function(error_text) {
+        this.upload_error.innerHTML = error_text;
     },
 
     fGetRow: function(row_data) {

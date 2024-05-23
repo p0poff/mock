@@ -9,6 +9,7 @@
     <title>Simple mock server</title>
     <style>
       .label_70 {font-size: 70%;}
+      .red {color: red;}
     </style>
   </head>
   <body>
@@ -127,6 +128,25 @@
             <table id="modal_log_area" style="width: 150%;"></table>
           </div> 
           <div id="modal_log_refresh_btn" role="button">Refresh requests</div>
+        </article>
+      </dialog>
+
+      <dialog id="modal_dialog_upload_file">
+        <article>
+          <header>
+            <button id="modal_upload_file_close_btn" aria-label="Close" rel="prev"></button>
+            <p>
+              <strong>Import DB</strong>
+            </p>
+          </header>
+          <form class="container" id="modal_upload_form" enctype="multipart/form-data">
+            <label class="label_70">
+              The downloaded sqlite DB file will remove the current routers.
+              <input type="file" id="modal_upload_file" name="file">
+            </label>
+            <button type="submit" data-tooltip="Current routes will be erased">Import</button>
+        </form>
+        <div class="container label_70 red" id="modal_upload_error"></div>
         </article>
       </dialog>
 
