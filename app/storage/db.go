@@ -3,8 +3,10 @@ package storage
 import (
 	"database/sql"
 	"encoding/json"
-	_ "github.com/mattn/go-sqlite3"
+	"fmt"
 	"log"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type SQLiteDB struct {
@@ -65,6 +67,21 @@ func (s *SQLiteDB) CreateTables() error {
 		VALUES ('default_headers', '{"Content-Type": "application/json"}');
 	
 		CREATE UNIQUE INDEX IF NOT EXISTS idx_route_url_method ON route (url, method);
+	`
+
+	// Execute the SQL query
+	_, err := s.db.Exec(query)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *SQLiteDB) deleteRouteTable() error {
+	query := `
+	DELETE FROM route;
+	VACUUM;
 	`
 
 	// Execute the SQL query
@@ -196,4 +213,55 @@ func (s *SQLiteDB) GetRoute(url string, method string) (Route, error) {
 
 }
 
-// Add other methods for interacting with the SQLite database here
+func (s *SQLiteDB) ImportDb(file_path string) error {
+	tmp_db, err := NewSqliteDB(file_path)
+	if err != nil {
+		log.Println("[ERROR] Error opening database:", err)
+		return err
+	}
+	defer tmp_db.Close()
+
+	query := `
+		SELECT id, url, method, headers, status_code, body
+		FROM route
+	`
+	rows, err := tmp_db.Query(query)
+	if err != nil {
+		log.Println("[ERROR] Error query:", err)
+		return err
+	}
+	defer rows.Close()
+
+	var routes []Route
+	for rows.Next() {
+		route, err := getRouteFromDb(rows)
+		if err != nil {
+			log.Println("[ERROR] Error make routers:", err)
+			return err
+		}
+
+		routes = append(routes, route)
+	}
+
+	if len(routes) == 0 {
+		err := fmt.Errorf("Empty import DB")
+		log.Println("[ERROR]:", err)
+		return err
+	}
+
+	err = s.deleteRouteTable()
+	if err != nil {
+		log.Println("[ERROR]:", err)
+		return err
+	}
+
+	for _, route := range routes {
+		err := s.AddRoute(route)
+		if err != nil {
+			log.Println("[ERROR] Error save router:", err)
+			return err
+		}
+	}
+
+	return nil
+}

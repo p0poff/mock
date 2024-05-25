@@ -89,9 +89,11 @@ const routers = {
         })
         .then(response => response.json())
         .then(data => {
-            console.log("File uploaded successfully:", data);
-            modal.fUploadSetError("");
-            modal.fUploadClose();
+            modal.fUploadSetError(data.Err);
+            if (data.Err == "") {
+                modal.fUploadClose();
+                routers.fGetAll();
+            } 
         })
         .catch(error => {
             modal.fUploadSetError("Error uploading file: " + error);

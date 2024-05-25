@@ -20,3 +20,8 @@ type Request struct {
 	Url    string
 	Method string
 }
+
+type ImportResponse struct {
+	Err     string
+	Message string
+}

@@ -197,6 +197,55 @@ func (s *Server) adminLogRoutesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResponse)
 }
 
+func (s *Server) adminUploadFileHandler(w http.ResponseWriter, r *http.Request) {
+	res := storage.ImportResponse{}
+
+	log.Printf("[INFO] Uploading DB file...")
+
+	if r.Method != "POST" {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse the multipart form in the request
+	err := r.ParseMultipartForm(10 << 20) // 10 MB
+	if err != nil {
+		http.Error(w, "Error parsing multipart form", http.StatusInternalServerError)
+		return
+	}
+
+	// Retrieve the file from form data
+	file, handler, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, "Error retrieving the file", http.StatusInternalServerError)
+		return
+	}
+	defer file.Close()
+
+	tmp_file_path, err := storage.SaveTmpDB(file, handler)
+	if err != nil {
+		http.Error(w, "Error save tmp file", http.StatusInternalServerError)
+		return
+	}
+
+	err = s.db.ImportDb(tmp_file_path)
+	if err != nil {
+		res.Err = "Import DB is Wrong"
+	} else {
+		res.Message = "Import DB is successfully"
+	}
+
+	jsonResponse, err := json.Marshal(res)
+	if err != nil {
+		log.Println("[ERROR] Failed to marshal JSON response:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonResponse)
+
+}
+
 func (s *Server) mockFaviconHandler(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Not found", http.StatusNotFound)
 }
@@ -236,6 +285,7 @@ func (s *Server) Start() error {
 	//routing
 	http.HandleFunc("/admin", s.adminindexHandler)
 	http.HandleFunc("/admin/save-route", s.adminSaveRouteHandler)
+	http.HandleFunc("/admin/upload-file", s.adminUploadFileHandler)
 	http.HandleFunc("/admin/get-routes", s.adminGetRoutesHandler)
 	http.HandleFunc("/admin/get-route", s.adminGetRouteHandler)
 	http.HandleFunc("/admin/delete-route", s.adminDeleteRouteHandler)
