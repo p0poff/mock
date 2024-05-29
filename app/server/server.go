@@ -185,6 +185,11 @@ func (s *Server) adminGetRoutesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResponse)
 }
 
+func (s *Server) adminLogRoutesClearHandler(w http.ResponseWriter, r *http.Request) {
+	s.stack = circular_stack.NewCircularStack(s.stack.GetLimit())
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (s *Server) adminLogRoutesHandler(w http.ResponseWriter, r *http.Request) {
 	routers := s.stack.All()
 	jsonResponse, err := json.Marshal(routers)
@@ -290,6 +295,7 @@ func (s *Server) Start() error {
 	http.HandleFunc("/admin/get-route", s.adminGetRouteHandler)
 	http.HandleFunc("/admin/delete-route", s.adminDeleteRouteHandler)
 	http.HandleFunc("/admin/log-route", s.adminLogRoutesHandler)
+	http.HandleFunc("/admin/log-clear", s.adminLogRoutesClearHandler)
 	http.HandleFunc("/admin/export.db", s.adminExportDbHandler)
 	http.HandleFunc("/favicon.ico", s.mockFaviconHandler)
 	http.HandleFunc("/", s.mockHandler)

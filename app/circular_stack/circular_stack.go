@@ -20,6 +20,10 @@ func NewCircularStack(limit int) *CircularStack {
 	}
 }
 
+func (cs *CircularStack) GetLimit() int {
+	return cs.limit
+}
+
 func (cs *CircularStack) getTop() int {
 	return (cs.top + 1) % cs.limit
 }
