@@ -308,19 +308,16 @@ const modal = {
     },
 
     fGetRow: function(row_data) {
-        const instance = document.importNode(this.log_template.content, true);
-        instance.querySelector(".log_row_date").textContent = row_data.Date;
-        instance.querySelector(".log_row_url").textContent = row_data.Url;
-        instance.querySelector(".log_row_method").textContent = row_data.Method;
-
-        return instance;
+        return row_data.Date + ' - ' + row_data.Method + '    ' + row_data.Url + '</br>';
     },
 
     fRefreshLog: function(data) {
         this.fClearLog();
-        data.forEach(function(row, index) {
-            modal.log_area.appendChild(modal.fGetRow(row));
+        let log = '';
+        data.reverse().forEach(function(row, index) {
+            log = log + modal.fGetRow(row);
         });
+        modal.log_area.innerHTML = log;
     },
 
     fClearLog: function() {

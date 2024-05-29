@@ -124,10 +124,13 @@
               <strong>Requests log</strong>
             </p>
           </header>
-          <div class="container" style="overflow-x: scroll;">
-            <table id="modal_log_area" style="width: 150%;"></table>
+          <div class="container" style="overflow: scroll;">
+            <div id="modal_log_area" style="width: 150%; height: 500px;"></div>
           </div> 
-          <div id="modal_log_refresh_btn" role="button">Refresh requests</div>
+          <div role="group">
+            <div id="modal_log_refresh_btn" role="button">🔄 Refresh requests</div>
+            <button id="modal_log_clear_btn" class="secondary">🗑️ Clear log</button>
+          </div>
         </article>
       </dialog>
 
@@ -150,11 +153,6 @@
         </article>
       </dialog>
 
-      <template id="log_row">
-        <tr>
-          <td class="log_row_date"></td><td class="log_row_method"></td><td class="log_row_url"></td>
-        </tr>
-      </template>
       <footer class="container">
         v 0.1.0
       </footer>
