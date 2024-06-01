@@ -168,6 +168,18 @@ const modal = {
     headers: document.getElementById("modal_data_headers"),
     body: document.getElementById("modal_data_body"),
 
+    fSetAttr: function(el, attr, v = '') {
+        if (!el.hasAttribute(attr)) {
+            el.setAttribute(attr, v);
+        }
+    },
+
+    fRemoveAttr: function(el, attr) {
+        if (el.hasAttribute(attr)) {
+            el.removeAttribute(attr);
+        }
+    },
+
     fInit: function() {
         this.close_btn.addEventListener('click', function() {
             modal.fClose()
@@ -253,54 +265,38 @@ const modal = {
     },
 
     fMarkHeaders: function() {
-        if (!this.headers.hasAttribute('aria-invalid')) {
-            this.headers.setAttribute('aria-invalid', 'true');
-        }
+        this.fSetAttr(this.headers, 'aria-invalid', 'true')
     },
 
     fUnmarkHeaders: function() {
-        if (this.headers.hasAttribute('aria-invalid')) {
-            this.headers.removeAttribute('aria-invalid');
-        }
+        this.fRemoveAttr(this.headers, 'aria-invalid')
     },
 
     fOpen: function(data) {
         this.fUnmarkHeaders();
         this.fSetData(data);
-        if (!this.dialog.hasAttribute('open')) {
-            this.dialog.setAttribute('open', '');
-        }
+        this.fSetAttr(this.dialog, 'open')
     },
 
     fClose: function() {
-        if (this.dialog.hasAttribute('open')) {
-            this.dialog.removeAttribute('open');
-        }
+        this.fRemoveAttr(this.dialog, 'open')
     },
 
     fLogOpen: function(data) {
         routers.fGetLog()
-        if (!this.log_dialog.hasAttribute('open')) {
-            this.log_dialog.setAttribute('open', '');
-        }
+        this.fSetAttr(this.log_dialog, 'open')
     },
 
     fLogClose: function() {
-        if (this.log_dialog.hasAttribute('open')) {
-            this.log_dialog.removeAttribute('open');
-        }
+        this.fRemoveAttr(this.log_dialog, 'open')
     },
 
     fUploadOpen: function(data) {
-        if (!this.upload_dialog.hasAttribute('open')) {
-            this.upload_dialog.setAttribute('open', '');
-        }
+        this.fSetAttr(this.upload_dialog, 'open')
     },
 
     fUploadClose: function() {
-        if (this.upload_dialog.hasAttribute('open')) {
-            this.upload_dialog.removeAttribute('open');
-        }
+        this.fRemoveAttr(this.upload_dialog, 'open')
     },
 
     fUploadSetError: function(error_text) {
