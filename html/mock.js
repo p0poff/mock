@@ -8,6 +8,13 @@ const routers = {
         })
     },
 
+    fClearLog: function() {
+        apiUrl = './admin/log-clear'
+        this.fRequestGet(apiUrl, function() {
+            routers.fGetLog();
+        })
+    },
+
     fGetLog: function() {
         apiUrl = './admin/log-route'
         this.fRequestGet(apiUrl, function() {
@@ -37,6 +44,9 @@ const routers = {
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok ' + response.statusText);
+            }
+            if (response.status == 204) {
+                return [];
             }
             return response.json();
         })
@@ -150,6 +160,7 @@ const modal = {
     log_area: document.getElementById("modal_log_area"),
     log_close_btn: document.getElementById("modal_log_close_btn"),
     log_refresh_btn: document.getElementById("modal_log_refresh_btn"),
+    log_clear_btn: document.getElementById("modal_log_clear_btn"),
     log_open_btn: document.getElementById("open_log_btn"),
     log_template: document.getElementById("log_row"),
     
@@ -203,6 +214,10 @@ const modal = {
 
         this.log_refresh_btn.addEventListener('click', function() {
             routers.fGetLog()
+        });
+
+        this.log_clear_btn.addEventListener('click', function() {
+            routers.fClearLog()
         });
 
         this.upload_open_btn.addEventListener('click', function() {
