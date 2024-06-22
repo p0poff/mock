@@ -2,7 +2,7 @@
 ## Instaling
 clone code with GIT and deploy from Docker compose
 ```bash
-git clone ...
+git clone ... OR unpack release source code zip (tar.gz)
 docker-compose up
 ```
 ### Run-time Customization
