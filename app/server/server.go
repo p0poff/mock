@@ -26,6 +26,11 @@ func NewServer(port string, db *storage.SQLiteDB, stack *circular_stack.Circular
 	return s
 }
 
+func setHeadersToResponse(w http.ResponseWriter, data []byte) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(data)
+}
+
 func (s *Server) adminExportDbHandler(w http.ResponseWriter, r *http.Request) {
 	file, err := os.Open(s.db.FilePath)
 
@@ -164,8 +169,7 @@ func (s *Server) adminGetRouteHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(jsonResponse)
+	setHeadersToResponse(w, jsonResponse)
 }
 
 func (s *Server) adminGetRoutesHandler(w http.ResponseWriter, r *http.Request) {
@@ -181,8 +185,7 @@ func (s *Server) adminGetRoutesHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(jsonResponse)
+	setHeadersToResponse(w, jsonResponse)
 }
 
 func (s *Server) adminLogRoutesClearHandler(w http.ResponseWriter, r *http.Request) {
@@ -198,8 +201,7 @@ func (s *Server) adminLogRoutesHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(jsonResponse)
+	setHeadersToResponse(w, jsonResponse)
 }
 
 func (s *Server) adminUploadFileHandler(w http.ResponseWriter, r *http.Request) {
@@ -246,8 +248,7 @@ func (s *Server) adminUploadFileHandler(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(jsonResponse)
+	setHeadersToResponse(w, jsonResponse)
 
 }
 
@@ -269,8 +270,6 @@ func (s *Server) mockHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-
 	// Set the headers
 	for key, value := range route.Headers {
 		w.Header().Set(key, value)
@@ -280,7 +279,7 @@ func (s *Server) mockHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(route.StatusCode)
 
 	// Write the body
-	w.Write([]byte(route.Body))
+	setHeadersToResponse(w, []byte(route.Body))
 }
 
 func (s *Server) Start() error {
