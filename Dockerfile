@@ -20,3 +20,5 @@ EXPOSE 8080
 WORKDIR /srv
 
 CMD ["/srv/app/main"]
+
+#  docker cp mock-service:app/main  ./app
