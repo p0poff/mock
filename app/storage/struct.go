@@ -16,9 +16,11 @@ type Setting struct {
 }
 
 type Request struct {
-	Date   string
-	Url    string
-	Method string
+	Date    string
+	Url     string
+	Method  string
+	Headers map[string]string
+	Body    string
 }
 
 type ImportResponse struct {
